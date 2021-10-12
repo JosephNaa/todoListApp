@@ -1,5 +1,7 @@
 package js.pekah.todoserver.controller.api.todo
 
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
 import js.pekah.todoserver.model.http.TodoDto
 import js.pekah.todoserver.service.TodoService
 import org.springframework.http.HttpHeaders
@@ -8,12 +10,15 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
+@Api(description = "일정관리")
 @RestController
 @RequestMapping("/api/todo")
 class TodoApiController(val todoService: TodoService) {
 
+    @ApiOperation(value = "일정확인", notes = "일정 확인 GET API")
     @GetMapping(path = [""])
-    fun read(@RequestParam(required = false) index: Int?): ResponseEntity<Any?> {
+    fun read(
+        @RequestParam(required = false) index: Int?): ResponseEntity<Any?> {
 
         return index?.let {
             todoService.read(it)
