@@ -25,7 +25,15 @@ class TodoRepositoryImpl: TodoRepository {
     }
 
     override fun saveAll(todoList: MutableList<Todo>): Boolean {
-        TODO("Not yet implemented")
+
+        return try {
+            todoList.forEach{
+                save(it)
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     override fun update(todo: Todo): Todo {
