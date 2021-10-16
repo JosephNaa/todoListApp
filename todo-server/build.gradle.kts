@@ -5,6 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
 	kotlin("jvm") version "1.5.31"
 	kotlin("plugin.spring") version "1.5.31"
+	kotlin("plugin.jpa") version "1.3.72"
 }
 
 group = "js.pekah"
@@ -27,6 +28,9 @@ dependencies {
 	// https://mvnrepository.com/artifact/io.springfox/springfox-swagger2
 	implementation("io.springfox:springfox-swagger2:2.9.2")
 
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-jdbc")
+	implementation("mysql:mysql-connector-java")
 
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
