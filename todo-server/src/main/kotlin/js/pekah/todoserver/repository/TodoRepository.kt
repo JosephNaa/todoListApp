@@ -1,15 +1,9 @@
 package js.pekah.todoserver.repository
 
 import js.pekah.todoserver.database.Todo
+import org.springframework.data.jpa.repository.JpaRepository
 
-interface TodoRepository {
+interface TodoRepository: JpaRepository<Todo, Int> {
 
-    fun save(todo: Todo): Todo?
-    fun saveAll(todoList: MutableList<Todo>): Boolean
-
-    fun delete(index: Int): Boolean
-
-    fun findOne(index: Int): Todo?
-    fun findAll(): MutableList<Todo>
-
+    override fun findAll(): MutableList<Todo>
 }

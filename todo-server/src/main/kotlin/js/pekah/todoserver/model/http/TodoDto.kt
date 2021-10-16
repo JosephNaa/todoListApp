@@ -14,7 +14,7 @@ data class TodoDto (
         example = "1",
         required = false
     )
-    var index: Int?=null,
+    var id: Int?=null,
 
     @field:ApiModelProperty(
         value = "일정명",
@@ -64,7 +64,7 @@ data class TodoDto (
 
 fun TodoDto.convertTodoDto(todo: Todo): TodoDto {
     return TodoDto().apply {
-        this.index = todo.index
+        this.id = todo.id
         this.title = todo.title
         this.description = todo.description
         this.schedule = todo.schedule?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
