@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat
 
 class EditTodoActivity : AppCompatActivity() {
     lateinit var binding: ActivityEditTodoBinding
+    private var todo: Todo?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,9 +19,12 @@ class EditTodoActivity : AppCompatActivity() {
         val type = intent.getStringExtra("type")
 
         if (type.equals("ADD")) {
-
+            binding.btnSave.text = "추가하기"
         } else {
-            binding.btnSave.text = "저장"
+            todo = intent.getSerializableExtra("item") as Todo?
+            binding.etTodoTitle.setText(todo!!.title)
+            binding.etTodoContent.setText(todo!!.content)
+            binding.btnSave.text = "수정하기"
         }
 
         binding.btnSave.setOnClickListener {
@@ -31,7 +35,19 @@ class EditTodoActivity : AppCompatActivity() {
             val todo = Todo(title, content, currentDate)
             if (type.equals("ADD")) {
                 if (title.isNotEmpty() && content.isNotEmpty()) {
-                    val intent = Intent().apply { putExtra("todo", todo) }
+                    val intent = Intent().apply {
+                        putExtra("todo", todo)
+                        putExtra("flag", 0)
+                    }
+                    setResult(RESULT_OK, intent)
+                    finish()
+                }
+            } else {
+                if (title.isNotEmpty() && content.isNotEmpty()) {
+                    val intent = Intent().apply {
+                        putExtra("todo", todo)
+                        putExtra("flag", 1)
+                    }
                     setResult(RESULT_OK, intent)
                     finish()
                 }

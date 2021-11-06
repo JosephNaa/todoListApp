@@ -20,11 +20,11 @@ class TodoRepository private constructor(context: Context){
 
     fun list(): LiveData<MutableList<Todo>> = todoDao.list()
 
-    fun getTodo(id: Long): LiveData<Todo> = todoDao.selectOne(id)
+    suspend fun getTodo(id: Long): Todo = todoDao.selectOne(id)
 
     suspend fun insert(dto: Todo) = todoDao.insert(dto)
 
-    fun update(dto: Todo) = todoDao.update(dto)
+    suspend fun update(dto: Todo) = todoDao.update(dto)
 
     fun delete(dto: Todo) = todoDao.delete(dto)
 
