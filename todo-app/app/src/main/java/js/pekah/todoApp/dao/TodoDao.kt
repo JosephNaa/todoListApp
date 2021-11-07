@@ -17,7 +17,7 @@ interface TodoDao {
     fun selectOne(id: Long): Todo
 
     @Update
-    fun update(dto: Todo)
+    suspend fun update(dto: Todo)
 
     @Delete
     fun delete(dto: Todo)

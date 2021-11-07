@@ -1,43 +1,47 @@
 package js.pekah.todoApp
 
 import android.content.Intent
+import android.graphics.Paint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import js.pekah.todoApp.adapter.TodoAdapter
-import js.pekah.todoApp.dao.TodoDao
 import js.pekah.todoApp.databinding.ActivityMainBinding
 import js.pekah.todoApp.dto.Todo
-import js.pekah.todoApp.repository.TodoRepository
+import js.pekah.todoApp.viewmodel.TodoViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivity_싸피"
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     lateinit var todoAdapter: TodoAdapter
-    lateinit var todoRepository: TodoRepository
-    lateinit var list: LiveData<MutableList<Todo>>
-    var todoList: MutableList<Todo>?=null
+
+    lateinit var todoViewModel: TodoViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        todoRepository = TodoRepository.get()
+        todoViewModel = ViewModelProvider(this)[TodoViewModel::class.java]
 
-        list = todoRepository.list()
-        list.observe(this) { it?.let {
+        todoViewModel.todoList.observe(this) { it
             Log.d(TAG, "onCreate: $it")
             todoAdapter.update(it)
-        } }
+            
+        }
 
         todoAdapter = TodoAdapter(this)
         binding.rvTodoList.layoutManager = LinearLayoutManager(this)
@@ -51,12 +55,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         todoAdapter.setItemClickListener(object: TodoAdapter.ItemClickListener {
-            override fun onClick(view: View, position: Int, id: Long) {
-                var todo: Todo?=null
-                Toast.makeText(this@MainActivity, "$id", Toast.LENGTH_SHORT).show()
+            override fun onClick(view: View, position: Int, itemId: Long) {
+                Toast.makeText(this@MainActivity, "$itemId", Toast.LENGTH_SHORT).show()
                 CoroutineScope(Dispatchers.IO).launch {
-                    todo = todoRepository.getTodo(id)
-                    Log.d(TAG, "onClick: ${todo!!.title} ${todo!!.content} ${todo!!.timestamp}")
+                    val todo = todoViewModel.getOne(itemId)
 
                     val intent = Intent(this@MainActivity, EditTodoActivity::class.java).apply {
                         putExtra("type", "EDIT")
@@ -65,38 +67,59 @@ class MainActivity : AppCompatActivity() {
                     requestActivity.launch(intent)
                 }
             }
+        })
 
+        todoAdapter.setItemCheckBoxClickListener(object: TodoAdapter.ItemCheckBoxClickListener {
+            override fun onClick(view: View, position: Int, itemId: Long) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    val todo = todoViewModel.getOne(itemId)
+                    todo.isChecked = !todo.isChecked
+                    todoViewModel.update(todo)
+                    Log.d(TAG, "onClick: ${todo.isChecked}")
+                }
+            }
         })
     }
 
     private val requestActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
             val todo = it.data?.getSerializableExtra("todo") as Todo
-            val flag = it.data?.getIntExtra("flag", -1)
 
-            when(flag) {
+            when(it.data?.getIntExtra("flag", -1)) {
                 0 -> {
                     CoroutineScope(Dispatchers.IO).launch {
-                        todoRepository.insert(todo)
+                        todoViewModel.insert(todo)
                     }
                     Toast.makeText(this, "추가되었습니다.", Toast.LENGTH_SHORT).show()
                 }
                 1 -> {
                     Log.d(TAG, "update: ${todo.title}")
                     CoroutineScope(Dispatchers.IO).launch {
-                        todoRepository.update(todo)
+                        todoViewModel.update(todo)
                     }
                     Toast.makeText(this, "수정되었습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
-
-            list.observe(this) { it?.let {
-                Log.d(TAG, "requestActivity: $it")
-                it.forEach { item ->
-                    Log.d(TAG, "${item.title}: ")
-                }
-                todoAdapter.update(it)
-            } }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_option, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item?.itemId) {
+            R.id.menu_item_delete -> {
+                Toast.makeText(this, "삭제", Toast.LENGTH_SHORT).show()
+                todoViewModel.todoList.value!!.forEach {
+                    if (it.isChecked) {
+                        todoViewModel.delete(it)
+                    }
+                }
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

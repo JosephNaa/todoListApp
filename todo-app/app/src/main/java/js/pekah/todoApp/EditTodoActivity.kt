@@ -32,9 +32,9 @@ class EditTodoActivity : AppCompatActivity() {
             val content = binding.etTodoContent.text.toString()
             val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm").format(System.currentTimeMillis())
 
-            val todo = Todo(title, content, currentDate)
             if (type.equals("ADD")) {
                 if (title.isNotEmpty() && content.isNotEmpty()) {
+                    val todo = Todo(0, title, content, currentDate, false)
                     val intent = Intent().apply {
                         putExtra("todo", todo)
                         putExtra("flag", 0)
@@ -44,6 +44,8 @@ class EditTodoActivity : AppCompatActivity() {
                 }
             } else {
                 if (title.isNotEmpty() && content.isNotEmpty()) {
+                    val todo = Todo(todo!!.id, title, content, currentDate, todo!!.isChecked)
+
                     val intent = Intent().apply {
                         putExtra("todo", todo)
                         putExtra("flag", 1)

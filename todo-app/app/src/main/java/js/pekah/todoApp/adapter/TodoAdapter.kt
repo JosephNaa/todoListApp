@@ -1,7 +1,9 @@
 package js.pekah.todoApp.adapter
 
 import android.content.Context
+import android.graphics.Paint
 import android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import js.pekah.todoApp.R
 import js.pekah.todoApp.dto.Todo
 
+private const val TAG = "TodoAdapter_싸피"
 class TodoAdapter(val context: Context): RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
 
     private var list = mutableListOf<Todo>()
@@ -25,13 +28,18 @@ class TodoAdapter(val context: Context): RecyclerView.Adapter<TodoAdapter.TodoVi
         fun onBind(data: Todo) {
             title.text = data.title
             timestamp.text = data.timestamp
+            checkbox.isChecked = data.isChecked
 
-            checkbox.setOnCheckedChangeListener{_, isChecked, ->
-                if (isChecked) {
-                    title.paintFlags = title.paintFlags or STRIKE_THRU_TEXT_FLAG
-                } else {
-                    title.paintFlags = title.paintFlags and STRIKE_THRU_TEXT_FLAG.inv()
-                }
+            Log.d(TAG, "onBind: ${checkbox.isChecked}")
+
+            if (data.isChecked) {
+                title.paintFlags = title.paintFlags or STRIKE_THRU_TEXT_FLAG
+            } else {
+                title.paintFlags = title.paintFlags and STRIKE_THRU_TEXT_FLAG.inv()
+            }
+
+            checkbox.setOnClickListener{
+                itemCheckBoxClickListener.onClick(it, layoutPosition, list[layoutPosition].id)
             }
 
             itemView.setOnClickListener {
@@ -62,9 +70,18 @@ class TodoAdapter(val context: Context): RecyclerView.Adapter<TodoAdapter.TodoVi
         fun onClick(view: View,  position: Int, itemId: Long)
     }
 
+    interface ItemCheckBoxClickListener {
+        fun onClick(view: View, position: Int, itemId: Long)
+    }
+
     private lateinit var itemClickListner: ItemClickListener
+    private lateinit var itemCheckBoxClickListener: ItemCheckBoxClickListener
 
     fun setItemClickListener(itemClickListener: ItemClickListener) {
         this.itemClickListner = itemClickListener
+    }
+
+    fun setItemCheckBoxClickListener(itemCheckBoxClickListener: ItemCheckBoxClickListener) {
+        this.itemCheckBoxClickListener = itemCheckBoxClickListener
     }
 }
