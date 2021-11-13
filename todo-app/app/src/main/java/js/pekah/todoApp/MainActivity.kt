@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
         todoViewModel = ViewModelProvider(this)[TodoViewModel::class.java]
 
-        todoViewModel.todoList.observe(this) { it
+        todoViewModel.todoList.observe(this) {
             Log.d(TAG, "onCreate: $it")
             todoAdapter.update(it)
             
