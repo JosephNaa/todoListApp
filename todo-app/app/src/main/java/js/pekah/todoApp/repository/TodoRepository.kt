@@ -2,44 +2,21 @@ package js.pekah.todoApp.repository
 
 import android.content.Context
 import androidx.lifecycle.LiveData
-import androidx.room.Room
-import js.pekah.todoApp.database.TodoDatabase
+import js.pekah.todoApp.api.TodoApi
 import js.pekah.todoApp.dto.Todo
+import js.pekah.todoApp.util.RetrofitUtil
 import java.lang.IllegalStateException
 
-private const val DATABASE_NAME = "todo-database.db"
-class TodoRepository private constructor(context: Context){
+class TodoRepository constructor(private val todoApi: TodoApi){
 
-    private val database: TodoDatabase = Room.databaseBuilder(
-        context.applicationContext,
-        TodoDatabase::class.java,
-        DATABASE_NAME
-    ).build()
+    suspend fun list() = todoApi.getTodoList()
 
-    private val todoDao = database.todoDao()
+    suspend fun getTodo(id: Long) = todoApi.getTodo(id)
 
-    fun list(): LiveData<MutableList<Todo>> = todoDao.list()
+    suspend fun create(dto: Todo) = todoApi.createTodo(dto)
 
-    fun getTodo(id: Long): Todo = todoDao.selectOne(id)
+    suspend fun update(id: Long) = todoApi.updateTodo(id)
 
-    fun insert(dto: Todo) = todoDao.insert(dto)
+    suspend fun delete(id: Long) = todoApi.deleteTodo(id)
 
-    suspend fun update(dto: Todo) = todoDao.update(dto)
-
-    fun delete(dto: Todo) = todoDao.delete(dto)
-
-    companion object {
-        private var INSTANCE: TodoRepository?=null
-
-        fun initialize(context: Context) {
-            if (INSTANCE == null) {
-                INSTANCE = TodoRepository(context)
-            }
-        }
-
-        fun get(): TodoRepository {
-            return INSTANCE ?:
-            throw IllegalStateException("TodoRepository must be initialized")
-        }
-    }
 }
